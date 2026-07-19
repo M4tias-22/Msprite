@@ -1,8 +1,7 @@
 // ==============================
-// CHESS VS - JavaScript Version
-// Parte 1: Setup + Pezzi + Tavola
+// CHESS - JavaScript Version
+// Parte 1:Setup + Pezzi + Tavola
 // ==============================
-
 const canvas = document.getElementById("board");
 const ctx = canvas.getContext("2d");
 
@@ -12,12 +11,10 @@ const SQ = SIZE / 8;
 canvas.width = SIZE;
 canvas.height = SIZE;
 
-
 // Colori tavola
 const WHITE = "#f5f5f5";
 const PURPLE = "#874dbf";
 const HIGHLIGHT = "rgba(0,255,0,0.35)";
-
 
 // Aperture (da riempire in futuro)
 const openings = [
@@ -299,9 +296,7 @@ function loadImages(){
 // ==============================
 // Classe Pezzo
 class Piece {
-
     constructor(color, kind){
-
         this.color = color;
         this.kind = kind;
 
@@ -350,16 +345,13 @@ reset(){
         ()=>Array(8).fill(null)
     );
     // pedoni
-
     for(let i=0;i<8;i++){
         this.board[1][i] =
         new Piece("black","pawn");
         this.board[6][i] =
         new Piece("white","pawn");
-
     }
     // torri
-
     this.board[0][0] =
     new Piece("black","rook");
     this.board[0][7] =
@@ -370,7 +362,6 @@ reset(){
     new Piece("white","rook");
 
     // cavalli
-
     this.board[0][1] =
     new Piece("black","knight");
     this.board[0][6] =
@@ -428,21 +419,17 @@ GameState.prototype.makeMove = function(move){
     if(move.castle){
 
         if(move.endCol === 6){
-
             let rook =
             this.board[move.endRow][7];
             this.board[move.endRow][5] = rook;
             this.board[move.endRow][7] = null;
-
         }
 
         if(move.endCol === 2){
-
             let rook =
             this.board[move.endRow][0];
             this.board[move.endRow][3] = rook;
             this.board[move.endRow][0] = null;
-
         }
     }
 
@@ -492,11 +479,8 @@ GameState.prototype.getAllMoves = function(){
                         c,
                         piece
                     ));
-
                 }
-
             }
-
         }
     }
     return moves;
@@ -515,40 +499,33 @@ if(piece.kind==="pawn"){
     piece.color==="white"
     ? -1
     : 1;
-
     let start =
     piece.color==="white"
     ? 6
     : 1;
 
     // avanti
-
     if(
     this.inBoard(r+dir,c)
     &&
     !this.board[r+dir][c]
     ){
-
         let move =
         new Move(
             [r,c],
             [r+dir,c],
             this.board
         );
-
         if(r+dir===0 || r+dir===7)
             move.promotion=true;
-
 
         moves.push(move);
 
         // doppio passo
-
         if(
         r===start &&
         !this.board[r+2*dir][c]
         ){
-
             moves.push(
                 new Move(
                     [r,c],
@@ -581,7 +558,6 @@ if(piece.kind==="pawn"){
                     [nr,nc],
                     this.board
                 );
-
                 if(nr===0 || nr===7)
                     move.promotion=true;
 
@@ -595,7 +571,6 @@ if(piece.kind==="pawn"){
 // ----------------
 
 if(piece.kind==="knight"){
-
 let jumps=[
 [-2,-1],
 [-2,1],
@@ -607,9 +582,7 @@ let jumps=[
 [2,1]
 ];
 
-
 for(let j of jumps){
-
     let nr=r+j[0];
     let nc=c+j[1];
 
@@ -622,7 +595,6 @@ for(let j of jumps){
         !target ||
         target.color!==piece.color
         ){
-
             moves.push(
                 new Move(
                     [r,c],
@@ -648,7 +620,6 @@ directions=[
 [0,-1],
 [0,1]
 ];
-
 }
 
 if(piece.kind==="bishop"){
@@ -683,10 +654,8 @@ for(let d of directions){
         if(!this.inBoard(nr,nc))
             break;
 
-
         let target =
         this.board[nr][nc];
-
 
         if(!target){
 
@@ -699,7 +668,6 @@ for(let d of directions){
             );
         }
         else{
-
             if(target.color!==piece.color){
                 moves.push(
                     new Move(
@@ -738,6 +706,7 @@ for(let d of dirs){
 
         let target =
         this.board[nr][nc];
+
         if(
         !target ||
         target.color!==piece.color
@@ -753,9 +722,95 @@ for(let d of dirs){
         }
     }
 }
+// ==
+// ARROCCO
+//
+
+// Arrocco corto bianco
+if(
+    piece.color==="white" &&
+    r===7 &&
+    c===4 &&
+    !this.whiteKingMoved &&
+    this.board[7][5]===null &&
+    this.board[7][6]===null &&
+    this.board[7][7] &&
+    this.board[7][7].kind==="rook"
+){
+    let move = new Move(
+        [7,4],
+        [7,6],
+        this.board
+    );
+    move.castle = true;
+    moves.push(move);
+}
+
+// Arrocco lungo bianco
+if(
+    piece.color==="white" &&
+    r===7 &&
+    c===4 &&
+    !this.whiteKingMoved &&
+    this.board[7][1]===null &&
+    this.board[7][2]===null &&
+    this.board[7][3]===null &&
+    this.board[7][0] &&
+    this.board[7][0].kind==="rook"
+){
+    let move = new Move(
+        [7,4],
+        [7,2],
+        this.board
+    );
+    move.castle = true;
+    moves.push(move);
+}
+
+// Arrocco corto nero
+if(
+    piece.color==="black" &&
+    r===0 &&
+    c===4 &&
+    !this.blackKingMoved &&
+    this.board[0][5]===null &&
+    this.board[0][6]===null &&
+    this.board[0][7] &&
+    this.board[0][7].kind==="rook"
+){
+    let move = new Move(
+        [0,4],
+        [0,6],
+        this.board
+    );
+    move.castle = true;
+    moves.push(move);
+}
+    
+// Arrocco lungo nero
+if(
+    piece.color==="black" &&
+    r===0 &&
+    c===4 &&
+    !this.blackKingMoved &&
+    this.board[0][1]===null &&
+    this.board[0][2]===null &&
+    this.board[0][3]===null &&
+    this.board[0][0] &&
+    this.board[0][0].kind==="rook"
+){
+    let move = new Move(
+        [0,4],
+        [0,2],
+        this.board
+    );
+    move.castle = true;
+    moves.push(move);
+}
 }
 return moves;
 };
+
 
 GameState.prototype.inBoard=function(r,c){
 return (
@@ -772,13 +827,14 @@ c<8
 let game;
 let selected = null;
 let playerColor = "white";
+let currentOpening = null;
+let openingIndex = 0;
 
 // Disegna scacchiera
 
 function drawBoard(){
 
     for(let r=0;r<8;r++){
-
         for(let c=0;c<8;c++){
 
             if((r+c)%2===0)
@@ -797,7 +853,6 @@ function drawBoard(){
 }
 
 // Disegna pezzi
-
 function drawPieces(){
     for(let r=0;r<8;r++){
         for(let c=0;c<8;c++){
@@ -920,37 +975,26 @@ function(e){
 function handleClick(row,col){
 
     if(selected===null){
-
         let piece =
         game.board[row][col];
-
         if(
         piece &&
         (
         piece.color==="white"
         )===game.whiteToMove
         ){
-
             selected={
                 r:row,
                 c:col
             };
-
         }
-
-
     }
 
     else{
-
-
         let moves =
         game.getValidMoves();
 
-
-
         for(let move of moves){
-
 
             if(
             move.startRow===selected.r &&
@@ -959,66 +1003,104 @@ function handleClick(row,col){
             move.endCol===col
             ){
 
-
                 game.makeMove(move);
-
 
                 selected=null;
 
-
                 draw();
-
-
                 setTimeout(aiMove,300);
 
-
                 return;
-
             }
-
-
         }
-
-
         selected=null;
-
     }
-
-
     draw();
-
 }
 
 
+function coordsToNotation(move){
+    let files =
+    ["a","b","c","d","e","f","g","h"];
 
+    return (
+        files[move.startCol] +
+        (8-move.startRow) +
+        files[move.endCol] +
+        (8-move.endRow)
+    );
+}
 
-
-
-
-// ==============================
-// IA casuale
-// ==============================
-
-
+// ================
+// IA
+// =================
 function aiMove(){
-
-
-    // muove solo quando non è il turno umano
 
     if(game.whiteToMove)
         return;
 
+    // prova a seguire l'apertura
+    if(
+        currentOpening &&
+        openingIndex < currentOpening.length
+    ){
 
+        let next =
+        currentOpening[openingIndex];
+        let moveNotation = next[0];
 
+for(let move of game.getValidMoves()){
+
+    // Arrocco corto
+    if(
+        moveNotation === "O-O" &&
+        move.pieceMoved.kind === "king" &&
+        Math.abs(move.endCol - move.startCol) === 2 &&
+        move.endCol === 6
+    ){
+        move.castle = true;
+        game.makeMove(move);
+        openingIndex++;
+        draw();
+        return;
+    }
+    // Arrocco lungo
+    if(
+        moveNotation === "O-O-O" &&
+        move.pieceMoved.kind === "king" &&
+        Math.abs(move.endCol - move.startCol) === 2 &&
+        move.endCol === 2
+    ){
+        move.castle = true;
+        game.makeMove(move);
+        openingIndex++;
+        draw();
+        return;
+    }
+    // Mossa normale
+    let start = next[0];
+    let end = next[1];
+
+    let notation =
+    coordsToNotation(move);
+
+    if(notation === start + end){
+
+        game.makeMove(move);
+        openingIndex++;
+        draw();
+        return;
+    }
+}
+    }
+
+    // se non trova la mossa dell'apertura
+    // gioca casuale
     let moves =
     game.getValidMoves();
 
-
-
     if(moves.length===0)
         return;
-
-
 
     let move =
     moves[
@@ -1026,10 +1108,10 @@ function aiMove(){
         Math.random()*moves.length
         )
     ];
+
     game.makeMove(move);
     draw();
 }
-
 // ==============================
 // Reset
 // ==============================
@@ -1040,23 +1122,22 @@ document
 function(){
 
     game.reset();
-
     selected=null;
-
     draw();
 });
 // =========================
 // Avvio
 // =========================
 async function start(){
-
     await loadImages();
-
     game =
     new GameState();
+    currentOpening =
+    openings[
+        Math.floor(Math.random()*openings.length)
+    ];
 
+    openingIndex = 0;
     draw();
-
 }
-
 start();
