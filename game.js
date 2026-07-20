@@ -406,6 +406,17 @@ GameState.prototype.makeMove = function(move){
     this.board[move.startRow][move.startCol] = null;
     this.board[move.endRow][move.endCol] =
         move.pieceMoved;
+    if(
+        move.pieceMoved.kind === "king"
+    ){
+        if(
+            move.pieceMoved.color === "white"
+        ){
+            this.whiteKingMoved = true;
+        } else {
+            this.blackKingMoved = true;
+        }
+    }
     // promozione automatica a regina
     if(move.promotion){
 
@@ -932,7 +943,6 @@ function(e){
 
         let col = Math.floor((x * scaleX) / SQ);
         let row = Math.floor((y * scaleY) / SQ);
-
         handleClick(row,col);
     }
 });
@@ -1031,9 +1041,9 @@ function coordsToNotation(move){
     );
 }
 
-// ================
+// ==============
 // IA
-// =================
+// ===============
 function aiMove(){
 
     if(game.whiteToMove)
@@ -1078,14 +1088,10 @@ for(let move of game.getValidMoves()){
         return;
     }
     // Mossa normale
-    let start = next[0];
-    let end = next[1];
-
     let notation =
     coordsToNotation(move);
 
-    if(notation === start + end){
-
+    if(notation === moveNotation){
         game.makeMove(move);
         openingIndex++;
         draw();
@@ -1093,7 +1099,6 @@ for(let move of game.getValidMoves()){
     }
 }
     }
-
     // se non trova la mossa dell'apertura
     // gioca casuale
     let moves =
