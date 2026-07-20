@@ -335,8 +335,8 @@ class Move {
 // Stato del gioco
 // ==============================
 class GameState {
-constructor(){
-    this.reset();
+    constructor(){
+        this.reset();
 }
 reset(){
     this.board =
