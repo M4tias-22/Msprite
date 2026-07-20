@@ -1045,77 +1045,87 @@ function coordsToNotation(move){
 // IA
 // ===============
 function aiMove(){
-
-    if(game.whiteToMove)
-        return;
-
     // prova a seguire l'apertura
     if(
         currentOpening &&
         openingIndex < currentOpening.length
     ){
-
         let next =
         currentOpening[openingIndex];
         let moveNotation = next[0];
+        let moveColor = next[1];
 
-for(let move of game.getValidMoves()){
+        for(let move of game.getValidMoves()){
 
-    // Arrocco corto
-    if(
-        moveNotation === "O-O" &&
-        move.pieceMoved.kind === "king" &&
-        Math.abs(move.endCol - move.startCol) === 2 &&
-        move.endCol === 6
-    ){
-        move.castle = true;
-        game.makeMove(move);
-        openingIndex++;
-        draw();
-        return;
-    }
-    // Arrocco lungo
-    if(
-        moveNotation === "O-O-O" &&
-        move.pieceMoved.kind === "king" &&
-        Math.abs(move.endCol - move.startCol) === 2 &&
-        move.endCol === 2
-    ){
-        move.castle = true;
-        game.makeMove(move);
-        openingIndex++;
-        draw();
-        return;
-    }
-    // Mossa normale
-    let notation =
-    coordsToNotation(move);
+            // Arrocco corto
+            if(
+                moveNotation === "O-O" &&
+                move.pieceMoved.kind === "king" &&
+                Math.abs(move.endCol - move.startCol) === 2 &&
+                move.endCol === 6
+            ){
+                move.castle = true;
+                game.makeMove(move);
+                openingIndex++;
+                draw();
+                // Se era il turno del giocatore, fai la mossa dell'IA dopo
+                if(moveColor === "white" && !game.whiteToMove){
+                    setTimeout(aiMove, 300);
+                }
+                return;
+            }
+            // Arrocco lungo
+            if(
+                moveNotation === "O-O-O" &&
+                move.pieceMoved.kind === "king" &&
+                Math.abs(move.endCol - move.startCol) === 2 &&
+                move.endCol === 2
+            ){
+                move.castle = true;
+                game.makeMove(move);
+                openingIndex++;
+                draw();
+                // Se era il turno del giocatore, fai la mossa dell'IA dopo
+                if(moveColor === "white" && !game.whiteToMove){
+                    setTimeout(aiMove, 300);
+                }
+                return;
+            }
+            // Mossa normale
+            let notation =
+            coordsToNotation(move);
 
-    if(notation === moveNotation){
-        game.makeMove(move);
-        openingIndex++;
-        draw();
-        return;
-    }
-}
+            if(notation === moveNotation){
+                game.makeMove(move);
+                openingIndex++;
+                draw();
+                // Se era il turno del giocatore, fai la mossa dell'IA dopo
+                if(moveColor === "white" && !game.whiteToMove){
+                    setTimeout(aiMove, 300);
+                }
+                return;
+            }
+        }
     }
     // se non trova la mossa dell'apertura
-    // gioca casuale
-    let moves =
-    game.getValidMoves();
+    // o se è il turno del giocatore, gioca casuale
+    if(!game.whiteToMove){
+        let moves =
+        game.getValidMoves();
 
-    if(moves.length===0)
-        return;
+        if(moves.length===0)
+            return;
 
-    let move =
-    moves[
-        Math.floor(
-        Math.random()*moves.length
-        )
-    ];
+        let move =
+        moves[
+            Math.floor(
+            Math.random()*moves.length
+            )
+        ];
 
-    game.makeMove(move);
-    draw();
+        game.makeMove(move);
+        draw();
+    }
 }
 // ==============================
 // Reset
@@ -1128,6 +1138,7 @@ function(){
 
     game.reset();
     selected=null;
+    openingIndex = 0;
     draw();
 });
 // =========================
